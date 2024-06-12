@@ -1,0 +1,313 @@
+global_sorting.c
+
+Algorithm:
+Find the first element of stack A and calculate the median
+of elements in stack A.
+
+Moving elements to stack B:
+
+While there are more than 3 elements in stack A, move elements from
+stack A to stack B.
+If the value at the top of stack B is greater than the median and there
+are more than three elements remaining in stack A, rotate stack B.
+
+Sorting the remaining elements in stack A:
+
+Sort the remaining three elements in stack A.
+Moving elements from stack B back to stack A with minimum cost:
+
+For each element in stack B, find the position in stack A with the minimum
+insertion cost and move the element considering this cost.
+Moving to the top of the stack and final sorting:
+
+Bring elements in stack A up so that the minimum element is on top.
+Move elements from stack B back to stack A.
+Bring the minimum element to the top of stack A.
+
+* The algorithm is efficient because it divides the sorting into two parts:
+partial sorting by moving elements around the median and final sorting
+of a small number of elements.
+* After splitting the stack into two parts, one side of stack B will
+contain elements less than the median, and the other side will contain
+elements greater than or equal to the median. This helps partially
+sort the elements.
+* Then, the remaining elements are sorted on stack A, and elements from
+stack B are moved back to stack A considering the minimum insertion cost.
+* The final sorting of elements in stack A involves moving the minimum
+element to the top of stack A.
+
+help_for_sorting_one.c
+
+int	is_median_candidate(t_stack_elem *stack)
+
+The function takes a pointer to a stack as input.
+It iterates through the elements of the stack from the
+beginning to the end.
+For each element, it calls the function find_median
+to check if the current element is a candidate for the median.
+If it finds an element that is a candidate for the median,
+the function returns its value.
+
+void	sort_for_three(t_stack_elem *stack)
+
+It checks if the elements are already sorted.
+If so, it does nothing and returns.
+If two operations are needed to sort the elements,
+it first swaps the top two elements, then rotates the top two elements.
+If the maximum element is at the beginning, it rotates the stack.
+If the first two elements need to be swapped, it swaps them.
+If the minimum element is at the end, it performs a reverse rotation.
+
+void	handle_element_placement(t_stack_elem *a, t_stack_elem *b, int i, int stack_size)
+
+Responsible for placing an element from stack B onto stack A at a specific position.
+It calculates the alignment between stacks A and B to determine
+the optimal position for insertion.
+It adjusts the insertion index based on alignment.
+If the adjusted index is beyond the top of stack A, it recalculates
+the index accordingly.
+It moves the element in stack A to the top if needed.
+It checks whether the element in stack B should be inserted before or
+after existing elements based on their values.
+It pushes the element from stack B to stack A.
+This function ensures that the element from stack B is placed
+in the correct position in stack A
+
+int	calculate_operations_for_placement(t_stack_elem *a, int index, int reel)
+
+calculates the number of operations needed to place an element at a specific
+position in stack A.
+The function takes a pointer to stack A, the index of the element to be placed,
+and a reel flag.
+It calculates the median of stack A.
+If the index is greater than the median, the function calculates the numbe
+of operations as the difference between the end index and the element index plus one.
+If the reel flag is 1, the number of operations is multiplied by -1.
+If the index is less than or equal to the median, the number of operations is
+calculated as the difference between the index and the start index.
+The function returns the number of operations needed to place the element.
+
+int	calculate_operations_for_good_placement(t_stack_elem *a, t_stack_elem *b, int index)
+
+Сalculates the number of operations needed to place an element from stack A into a good
+position relative to stack B.
+It takes pointers to stacks A and B, and the index of the element to be placed.
+It initializes a variable count_op to keep track of the total number of operations.
+It calculates the operations needed to place the element at the given index in stack A.
+Then, it checks whether the element at the index should be placed before or after elements
+in stack B to maintain order.
+If the element should be placed before the minimum or after the maximum element in stack B,
+it calculates the operations accordingly.
+If not, it finds the minimum element in stack B that is greater than the element from stack A
+and calculates the operations to place it before that minimum element.
+It calculates the coherence between stacks A and B at the given index.
+Adjusts the count of operations based on the coherence.
+Finally, it returns the total count of operations needed, incremented by 1.
+
+help_for_sorting_two.c
+
+int find_median(t_stack_elem *stack, int value)
+
+Сhecks whether a given value is a candidate for the median in the stack.
+
+Takes a pointer to the stack stack and a value value to check for
+its candidacy as a median.
+Initializes variables start and end to point to the beginning
+and end of the stack.
+Initializes variables big and small to count the number of elements
+greater than and less than the given value.
+Iterates through the elements of the stack from start to end.
+For each element, compares its value with the given value and
+increments the corresponding counter big or small.
+If the difference between the count of elements greater than and less than
+value is between -1 and 1 (inclusive), the function returns 1, indicating
+that the value is a candidate for the median.
+Otherwise, it returns 0.
+
+int	move_to_top(t_stack_elem *a, int index, char *r, char *rr)
+
+Moves an element to the top of stack A using rotation operations.
+It takes a pointer to stack A a, the index of the element to move index,
+and two strings r and rr representing rotation commands.
+It calculates the number of operations required to move the element to
+the top using calculate_operations_for_placement.
+It determines the sign of the remaining operations.
+It iterates through the rotation operations (r or rr) based on the sign
+until all operations are performed.
+It returns the total number of operations performed, considering the sign.
+
+int calculate_alignment(t_stack_elem *a, t_stack_elem *b, int index)
+
+Сalculates the alignment of an element between stacks A and B when placing it.
+Takes pointers to stacks A and B (a and b) and the index of the element
+to be placed (index).
+Computes the number of operations needed to place the element in stack A
+(operations_a) using the calculate_operations_for_placement function.
+If the element should be placed on stack B, it also calculates the number
+of operations for stack B (operations_b).
+Computes the distance between the number of operations in stacks A and B.
+Returns the distance between the alignment of stacks A and B.
+
+void	resolve_calculate_alignment(t_stack_elem *a, t_stack_elem *b, int index)
+
+function adjusts the alignment between stacks A and B based on the
+calculated distance.
+t takes pointers to stacks A and B (a and b) and the index of the element (index) for
+which alignment needs to be resolved.
+Calculates the distance between the alignment of stacks A and B using the
+calculate_alignment function.
+If the distance is positive, it means stack A needs to rotate, so it rotates stack A.
+If the distance is negative, it means stack B needs to rotate, so it rotates stack B
+in the opposite direction.
+It adjusts the alignment until the distance becomes zero.
+
+int find_min_cost_index(t_stack_elem *a, t_stack_elem *b, int stack_size)
+
+finds the index of the element in stack A with the minimum cost of placement on stack B.
+Takes pointers to stacks A and B (a and b) and the size of the stack (stack_size).
+Starts the search from the beginning of stack A.
+For each element in stack A, it calculates the cost of placing it on stack B using the
+calculate_operations_for_good_placement function.
+Compares the cost of the current element with the minimum cost found so far.
+If the cost of the current element is less than the minimum or it's the first element
+being checked, updates the minimum cost and its index.
+Continues searching until the end of stack A.
+Returns the index of the element with the minimum cost of placement on stack B.
+
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./push_swap
+valgrind --leak-check=full ./push_swap
+
+
+
+Алгоритм:
+Находим первый элемент стека A и вычисляем медиану элементов в стеке A.
+
+Перемещение элементов в стек B:
+
+Пока в стеке A больше 3 элементов, перемещаем элементы из стека A в стек B.
+Если значение на вершине стека B больше медианы и в стеке A остается более трех элементов, поворачиваем стек B.
+
+Сортировка оставшихся элементов в стеке A:
+
+Сортируем оставшиеся три элемента в стеке A.
+
+Перемещение элементов из стека B обратно в стек A с минимальной стоимостью:
+
+Для каждого элемента в стеке B находим позицию в стеке A с минимальной стоимостью вставки и перемещаем элемент, учитывая эту стоимость.
+
+Перемещение в верх стека и окончательная сортировка:
+
+Поднимаем элементы в стеке A таким образом, чтобы минимальный элемент был наверху.
+Перемещаем элементы из стека B обратно в стек A.
+Помещаем минимальный элемент наверх стека A.
+
+* Алгоритм эффективен, потому что разделяет сортировку на две части:
+частичная сортировка путем перемещения элементов вокруг медианы и окончательная сортировка
+небольшого количества элементов.
+* После разделения стека на две части, одна сторона стека B будет
+содержать элементы меньше медианы, а другая сторона будет содержать
+элементы больше или равные медиане. Это помогает частично
+отсортировать элементы.
+* Затем оставшиеся элементы сортируются в стеке A, и элементы из
+стека B перемещаются обратно в стек A с учетом минимальной стоимости вставки.
+* Окончательная сортировка элементов в стеке A включает перемещение минимального
+элемента наверх стека A.
+
+help_for_sorting_one.c
+
+int is_median_candidate(t_stack_elem *stack)
+
+Функция принимает указатель на стек в качестве входных данных.
+Она перебирает элементы стека от начала до конца.
+Для каждого элемента вызывается функция find_median
+для проверки, является ли текущий элемент кандидатом на медиану.
+Если находится элемент, который является кандидатом на медиану,
+функция возвращает его значение.
+
+void sort_for_three(t_stack_elem *stack)
+
+Проверяет, отсортированы ли элементы.
+Если да, то ничего не делает и возвращает.
+Если для сортировки требуется две операции,
+сначала меняет местами два верхних элемента, затем поворачивает верхние два элемента.
+Если максимальный элемент находится в начале, поворачивает стек.
+Если первые два элемента нужно поменять местами, они меняются местами.
+Если минимальный элемент находится в конце, выполняется обратное вращение.
+
+void handle_element_placement(t_stack_elem *a, t_stack_elem *b, int i, int stack_size)
+
+Отвечает за размещение элемента из стека B на стеке A в определенной позиции.
+Вычисляет согласование между стеками A и B для определения
+оптимальной позиции для вставки.
+Корректирует индекс вставки на основе согласования.
+Если скорректированный индекс находится за пределами вершины стека A, пересчитывает
+индекс соответствующим образом.
+Перемещает элемент в стеке A наверх, если это необходимо.
+Проверяет, должен ли элемент из стека B быть вставлен перед или после
+существующих элементов на основе их значений.
+Перекладывает элемент из стека B в стек A.
+Эта функция гарантирует, что элемент из стека B размещается
+в правильной позиции в стеке A
+
+int calculate_operations_for_placement(t_stack_elem *a, int index, int reel)
+
+Вычисляет количество операций, необходимых для размещения элемента в определенной
+позиции в стеке A.
+Функция принимает указатель на стек A, индекс элемента для размещения,
+и флаг reel.
+Вычисляет медиану стека A.
+Если индекс больше медианы, функция вычисляет количество операций как разницу между конечным индексом и индексом элемента плюс один.
+Если флаг reel равен 1, количество операций умножается на -1.
+Если индекс меньше или равен медиане, количество операций вычисляется как разница между индексом и начальным индексом.
+Функция возвращает количество операций, необходимых для размещения элемента.
+
+int calculate_operations_for_good_placement(t_stack_elem *a, t_stack_elem *b, int index)
+
+Вычисляет количество операций, необходимых для размещения элемента из стека A в хорошую
+позицию относительно стека B.
+Принимает указатели на стеки A и B и индекс элемента для размещения.
+Инициализирует переменную count_op для отслеживания общего количества операций.
+Вычисляет операции, необходимые для размещения элемента в указанном индексе в стеке A.
+Затем проверяет, следует ли разместить элемент в указанном индексе до или после элементов
+в стеке B для поддержания порядка.
+Если элемент должен быть размещен перед минимальным или после максимального элемента в стеке B,
+вычисляет операции соответственно.
+Если нет, находит минимальный элемент в стеке B, который больше элемента из стека A,
+и вычисляет операции для размещения его перед этим минимальным элементом.
+Вычисляет согласованность между стеками A и B для указанного индекса.
+Корректирует количество операций на основе согласованности.
+Наконец, возвращает общее количество необходимых операций, увеличенное на 1.
+
+help_for_sorting_two.c
+
+int find_median(t_stack_elem *stack, int value)
+
+Проверяет, является ли заданное значение кандидатом на медиану в стеке.
+
+Принимает указатель на стек stack и значение value для проверки
+его кандидатуры на медиану.
+Инициализирует переменные start и end для указания на начало
+и конец стека.
+Инициализирует переменные big и small для подсчета количества элементов
+больше и меньше заданного значения.
+Перебирает элементы стека от начала до конца.
+Для каждого элемента сравнивает его значение с заданным значением и
+увеличивает соответствующий счетчик big или small.
+Если разница между количеством элементов больше и меньше
+значения находится в диапазоне от -1 до и 1 (включительно), функция возвращает 1, указывая, что значение является кандидатом на медиану. В противном случае она возвращает 0.
+
+int move_to_top(t_stack_elem *a, int index, char *r, char *rr)
+
+Перемещает элемент в верх стека A с использованием операций вращения. Принимает указатель на стек A, индекс перемещаемого элемента, и две строки, представляющие команды вращения. Вычисляет количество операций, необходимых для перемещения элемента в верх с использованием функции calculate_operations_for_placement. Определяет знак оставшихся операций. Перебирает операции вращения (r или rr) в зависимости от знака до выполнения всех операций. Возвращает общее количество выполненных операций, учитывая знак.
+
+int calculate_alignment(t_stack_elem *a, t_stack_elem *b, int index)
+
+Вычисляет выравнивание элемента между стеками A и B при его размещении. Принимает указатели на стеки A и B и индекс элемента, который нужно разместить. Вычисляет количество операций, необходимых для размещения элемента в стек A с использованием функции calculate_operations_for_placement. Если элемент должен быть помещен в стек B, также вычисляет количество операций для стека B. Вычисляет разницу между количеством операций в стеках A и B. Возвращает разницу между выравниванием стеков A и B.
+
+void resolve_calculate_alignment(t_stack_elem *a, t_stack_elem *b, int index)
+
+Функция корректирует выравнивание между стеками A и B на основе вычисленной разницы. Принимает указатели на стеки A и B и индекс элемента, для которого нужно скорректировать выравнивание. Вычисляет разницу между выравниванием стеков A и B с использованием функции calculate_alignment. Если разница положительная, это значит, что стек A нужно вращать, поэтому он вращает стек A. Если разница отрицательная, это значит, что стек B нужно вращать, поэтому он вращает стек B в противоположном направлении. Корректирует выравнивание до тех пор, пока разница не станет нулевой.
+
+int find_min_cost_index(t_stack_elem *a, t_stack_elem *b, int stack_size)
+
+Находит индекс элемента в стеке A с минимальной стоимостью размещения в стеке B. Принимает указатели на стеки A и B и размер стека. Начинает поиск с начала стека A. Для каждого элемента в стеке A вычисляет стоимость его размещения в стеке B с использованием функции calculate_operations_for_good_placement. Сравнивает стоимость текущего элемента с минимальной найденной стоимостью. Если стоимость текущего элемента меньше минимальной или это первый проверяемый элемент, обновляет минимальную стоимость и её индекс. Продолжает поиск до конца стека A. Возвращает индекс элемента с минимальной стоимостью размещения в стеке B.
